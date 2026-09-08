@@ -1,11 +1,14 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import axiosInstance from '@/utils/axiosInstance';
 import { toast } from 'react-toastify';
 import { HelpCircle, Plus, Trash2, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
 export default function QuestionManager() {
+    const searchParams = useSearchParams();
+    const requestedQuizId = searchParams.get('quizId');
     const [quizzes, setQuizzes] = useState([]);
     const [questions, setQuestions] = useState([]);
     const [selectedQuizId, setSelectedQuizId] = useState('');
@@ -34,13 +37,18 @@ export default function QuestionManager() {
                 const res = await axiosInstance.get('/admin/quiz/view');
                 if (res.data.status && res.data.data.length > 0) {
                     setQuizzes(res.data.data);
-                    setSelectedQuizId(res.data.data[0]._id);
-                    setFormData(prev => ({ ...prev, quiz: res.data.data[0]._id }));
+                    // The "+ Questions" link includes quizId, so add to that quiz—not
+                    // silently to the first quiz in the list.
+                    const selectedId = res.data.data.some((quiz) => quiz._id === requestedQuizId)
+                        ? requestedQuizId
+                        : res.data.data[0]._id;
+                    setSelectedQuizId(selectedId);
+                    setFormData(prev => ({ ...prev, quiz: selectedId }));
                 }
             } catch (e) { console.error(e); }
         };
         fetchQuizzes();
-    }, []);
+    }, [requestedQuizId]);
 
     useEffect(() => {
         if (!selectedQuizId) return;
@@ -87,9 +95,8 @@ export default function QuestionManager() {
                 toast.error(res.data.message || "Failed to add question.");
             }
         } catch (err) {
-            toast.success("Question saved!");
-            setQuestions(prev => [payload, ...prev]);
-            setFormData(prev => ({ ...prev, questionText: '', englishQuestionText: '', optionA: '', optionB: '', optionC: '', optionD: '', englishOptionA: '', englishOptionB: '', englishOptionC: '', englishOptionD: '', explanation: '', englishExplanation: '' }));
+            console.error('Error saving question:', err);
+            toast.error(err.response?.data?.message || 'Question could not be saved. Please try again.');
         }
     };
 
