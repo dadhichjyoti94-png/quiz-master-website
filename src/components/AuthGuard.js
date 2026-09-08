@@ -10,6 +10,8 @@ export default function AuthGuard({ children, adminOnly = false }) {
     const [allowed, setAllowed] = useState(false);
 
     useEffect(() => {
+        // A route or role change must be checked again before its content renders.
+        setAllowed(false);
         const token = localStorage.getItem('qm_token');
         const storedUser = localStorage.getItem('qm_user');
         let user = null;

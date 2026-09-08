@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import axiosInstance from '@/utils/axiosInstance';
+import axiosInstance, { apiConfigurationError } from '@/utils/axiosInstance';
 import { toast } from 'react-toastify';
 import { Lock, Mail, User } from 'lucide-react';
 
@@ -19,6 +19,10 @@ export default function LoginPage() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (apiConfigurationError) {
+            toast.error(apiConfigurationError);
+            return;
+        }
         setLoading(true);
 
         try {

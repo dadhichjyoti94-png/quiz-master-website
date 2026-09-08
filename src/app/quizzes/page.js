@@ -48,9 +48,10 @@ export default function QuizzesPage() {
         fetchQuizzes();
     }, [selectedCategory, selectedDifficulty]);
 
-    const filteredQuizzes = quizzes.filter(q =>
-        q.quizTitle.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredQuizzes = quizzes.filter(q => {
+        const quizTitle = q.quizTitle || q.title || q.categoryName || '';
+        return quizTitle.toLowerCase().includes(searchQuery.toLowerCase());
+    });
 
     return (
         <AuthGuard><div className="space-y-8 py-4">
@@ -133,7 +134,7 @@ export default function QuizzesPage() {
                                         {q.difficulty || 'Medium'}
                                     </span>
                                 </div>
-                                <h3 className="text-xl font-bold text-white font-outfit">{q.quizTitle}</h3>
+                                <h3 className="text-xl font-bold text-white font-outfit">{q.quizTitle || q.title || q.categoryName || 'Untitled Quiz'}</h3>
                                 <p className="text-xs text-slate-400 line-clamp-3 leading-relaxed">
                                     {q.description || 'Interactive technical assessment test with automatic timer and scorecard.'}
                                 </p>
